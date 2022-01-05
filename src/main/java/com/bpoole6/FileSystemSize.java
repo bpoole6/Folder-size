@@ -19,7 +19,7 @@ class FileSystemSize {
     // File Depth for walking file system
     private static final int MAX_DEPTH = 4;
 
-    private static final Map<String, FolderDesc> FOLDER_MAP = new HashMap<>();
+    private static final Map<String, FolderDescription> FOLDER_MAP = new HashMap<>();
 
     private static final char FILE_SEPARATOR = Optional.ofNullable(System.getProperty("file.separator")).map(s->s.charAt(0)).orElse('/');
 
@@ -55,10 +55,10 @@ class FileSystemSize {
         }).reduce(0L, Long::sum);
     }
 
-    public static FolderDesc size(String folder) {
+    public static FolderDescription size(String folder) {
         System.out.println("Working on folder " + folder);
         long size = getFolderSize(Paths.get(folder));
-        return FOLDER_MAP.put(folder, new FolderDesc(folder, size));
+        return FOLDER_MAP.put(folder, new FolderDescription(folder, size));
     }
 
     public static List<String> walkFileTree() throws IOException {
@@ -109,7 +109,7 @@ class FileSystemSize {
 
         //Assign parent/child relation
         FOLDER_MAP.forEach((folder, desc) -> {
-            FolderDesc parent = FOLDER_MAP.get(Paths.get(folder).getParent().toString());
+            FolderDescription parent = FOLDER_MAP.get(Paths.get(folder).getParent().toString());
             if (parent != null) {
                 parent.getChildren().add(desc);
                 desc.setParent(parent);
@@ -119,7 +119,7 @@ class FileSystemSize {
         ObjectMapper mapper = new ObjectMapper();
 
         //find root most folder
-        Optional<FolderDesc> root = FOLDER_MAP.values().stream().filter(a -> a.getParent() == null).findFirst();
+        Optional<FolderDescription> root = FOLDER_MAP.values().stream().filter(a -> a.getParent() == null).findFirst();
         StringWriter sw = new StringWriter();
         if (root.isPresent()) {
             mapper.writeValue(sw, Collections.singletonList(root.map(Tree::new).get()));
